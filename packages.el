@@ -48,3 +48,11 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
+
+(package! glsl-mode)
+
+(package! company-glsl)
+
+(package! flycheck-glsl
+  :recipe (:host github :repo "yrns/flycheck-glsl"
+           :fork (:host github :repo "JeffreyPalmer/flycheck-glsl")))

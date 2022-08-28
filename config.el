@@ -22,12 +22,18 @@
 ;; accept. For example:
 ;;
 (setq doom-font (font-spec :family "JetBrains Mono" :size 12 :weight 'light)
-      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 16))
+      doom-variable-pitch-font (font-spec :family "Fira Sans" :weight 'light))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
+
+;; This is a workaround for variable pitch fonts not being sized correctly
+(use-package! mixed-pitch
+  :config
+  (setq mixed-pitch-set-height t)
+  (set-face-attribute 'variable-pitch nil :height 150))
 
 (add-hook! 'org-mode-hook #'mixed-pitch-mode)
 (add-hook! 'org-mode-hook #'solaire-mode)
@@ -37,6 +43,9 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
+(after! doom-themes
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic t))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -44,8 +53,144 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq org-directory "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org")
 
+(after! org-clock
+  (setq org-clock-persist 'history)
+  (org-clock-persistence-insinuate))
+
+(after! (org org-agenda)
+  (setq org-agenda-files (list org-directory)
+        org-agenda-start-day nil
+        org-default-notes-file (concat org-directory "/inbox.org")
+        org-enforce-todo-dependencies t
+        org-fontify-quote-and-verse-blocks t
+        org-src-tab-acts-natively t
+        org-src-fontify-natively t
+        org-hide-emphasis-markers t
+        org-hide-leading-stars t
+        org-insert-heading-respect-content t
+        org-fold-catch-invisible-edits 'show-and-error
+        org-use-speed-commands t
+        ;; open org links in the same window
+        org-link-frame-setup '((file . find-file))
+        ;; calculate completion statistics for multi-level projects
+        org-hierarchical-todo-statistics nil
+        ;; org-agenda-hide-tags-regexp TODO - figure out what this should be
+        ;; don't show scheduled TODO items
+        org-agenda-todo-ignore-scheduled 'future
+        ;; logging work
+        org-log-done 'time
+        org-log-into-drawer "LOGBOOK"
+        ;; capture settings
+        org-capture-templates '(("t" "To Do" entry (file "")
+                                 "* TODO %?\n")
+                                ("g" "Generic" entry (file "")
+                                 "* %?\n")
+                                ("j" "Journal Entry"
+                                 entry (file+olp+datetree "journal.org")
+                                 "* %?")
+                                ("l" "A link, for reading later." entry (file "")
+                                 "* [[%:link][%:description]]%?"))
+        ;; refile settings
+        org-refile-targets '((nil :maxlevel . 9)
+                             (org-agenda-files :maxlevel . 9))
+        org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil
+        org-refile-allow-creating-parent-nodes 'confirm
+        org-log-note-headings '((done        . "CLOSING NOTE %t")
+                                (note        . "Note taken on %t")
+                                (state       . "State %-12s from %-12S %t")
+                                (reschedule  . "Rescheduled from %S on %t")
+                                (delschedule . "Not scheduled, was %S on %t")
+                                (redeadline  . "New deadline from %S on %t")
+                                (deldeadline . "Removed deadline, was %S on %t"))
+        org-startup-indented t
+        org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "TODAY(y)" "IN_PROGRESS(i)" "WAITING(w@/!)" "|" "DONE(d!/!)")
+                            (sequence "PROJECT(p)" "ACTIVE(a)" "|" "FINISHED(f!)" "CANCELLED(c@)")
+                            (sequence "SOMEDAY(S!)" "MAYBE(m!)"))
+        org-todo-keyword-faces '(("TODO" :foreground "DodgerBlue3")
+                                 ("NEXT" :foreground "DodgerBlue2")
+                                 ("TODAY" :foreground "SpringGreen2")
+                                 ("IN_PROGRESS" :foreground "SpringGreen2")
+                                 ("DONE" :foreground "forest green")
+                                 ("PROJECT" :foreground "cornflower blue")
+                                 ("ACTIVE" :foreground "deep sky blue")
+                                 ("FINISHED" :foreground "forest green")
+                                 ("CANCELLED" :foreground "goldenrod")
+                                 ("WAITING" :foreground "coral")
+                                 ("SOMEDAY" :foreground "purple")
+                                 ("MAYBE" :foreground "purple"))
+        org-todo-state-tags-triggers '(("PROJECT" ("project" . t) ("active" . nil))
+                                       ("" ("project" . nil) ("active" . nil))
+                                       ("ACTIVE" ("active" . t))
+                                       ("FINISHED" ("active" . nil))
+                                       ("SOMEDAY" ("active" . nil))
+                                       ("MAYBE" ("active" . nil)))
+        ;; agenda customization
+        org-agenda-span 'day
+        org-stuck-projects '("/PROJECT|ACTIVE" ("NEXT" "TODAY") nil "")
+        org-agenda-compact-blocks nil
+        org-agenda-block-separator ?\-
+        org-agenda-dim-blocked-tasks nil
+        org-agenda-custom-commands
+        '(
+          ;; a view that supports:
+          ;; - most important task of the day
+          ;; - secondary tasks
+          ;; - other tasks if i have time
+          ("d" "Daily View"
+           ((agenda "" nil)
+            (todo "WAITING"
+                  ((org-agenda-overriding-header "Waiting")))
+            (tags-todo "/TODAY|IN_PROGRESS"
+                       ((org-agenda-overriding-header "Most Important Tasks for Today")))
+            (todo "ACTIVE"
+                  ((org-agenda-overriding-header "Active Projects")))
+            (tags-todo "active/NEXT"
+                       ((org-agenda-overriding-header "Active Project Next Tasks")
+                        (org-agenda-sorting-strategy '(todo-state-down category-keep))))
+            (tags "REFILE"
+                  ((org-agenda-overriding-header "Inbox")
+                   (org-tags-match-list-sublevels nil)))
+            (tags-todo "-active+project/NEXT"
+                       ((org-agenda-overriding-header "Other Project Next Tasks")
+                        (org-agenda-sorting-strategy '(todo-state-down category-keep))))
+            (tags-todo "+active/TODO"
+                       ((org-agenda-overriding-header "Active Project Tasks")
+                        (org-agenda-sorting-strategy '(todo-state-down category-keep))))))
+          ("D" "Review completed tasks"
+           ((tags-todo "/DONE"
+                       ((org-agenda-overriding-header "Completed Tasks and Projects")))))
+          ("n" "Non-Project Tasks"
+           ((tags-todo "-project-active/!TODO|NEXT|TODAY"
+                       ((org-agenda-overriding-header "Non-Project Tasks")))))
+          ("p" "Project Review"
+           ((tags-todo "/PROJECT|ACTIVE"
+                       ((org-agenda-overriding-header "Stuck Projects")
+                        (org-agenda-skip-function '(org-agenda-skip-subtree-if 'todo '("NEXT" "TODAY")))))
+            (tags-todo "/ACTIVE"
+                       ((org-agenda-overriding-header "Active Projects")
+                        (org-agenda-skip-function '(org-agenda-skip-subtree-if 'nottodo '("NEXT" "TODAY")))))
+            (tags-todo "/PROJECT"
+                       ((org-agenda-overriding-header "Other Projects")
+                        (org-agenda-skip-function '(org-agenda-skip-subtree-if 'nottodo '("NEXT" "TODAY")))))
+            (tags-todo "-CANCELLED/"
+                       ((org-agenda-overriding-header "Reviews Scheduled")
+                        (org-agenda-skip-function 'org-review-agenda-skip)
+                        (org-agenda-cmp-user-defined 'org-review-compare)
+                        (org-agenda-sorting-strategy '(user-defined-down))))))
+          ("h" "Habits" tags-todo "STYLE=\"habit\""
+           ((org-agenda-overriding-header "Habits")
+            (org-agenda-sorting-strategy
+             '(todo-state-down effort-up category-keep))))
+          ("i" "Inbox" tags "REFILE"
+           ((org-agenda-overriding-header "Inbox")
+            (org-tags-match-list-sublevels nil))))))
+
+
+;; Org Roam support
+(setq org-roam-directory "~/Documents/OrgRoam")
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -79,5 +224,24 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-;; TODO
-;; - add keybind for ace-window to "M-o"
+;; glsl support
+(use-package! company-glsl
+  :config (add-to-list 'company-backends 'company-glsl))
+
+(use-package! flycheck-glsl
+  :after (flycheck dash)
+  :config (flycheck-glsl-setup))
+
+(use-package! glsl-mode
+  :mode "(\\.\\(glsl\\|vert\\|frag\\|geom\\)\\'")
+
+
+
+(map! "C-x b" #'consult-buffer)
+(map! "M-g g" #'avy-goto-line)
+(map! "M-g M-g" #'avy-goto-line)
+(map! "s-;" #'avy-goto-char-2)
+(map! "M-o" #'ace-window)
+(map! "C-c n b" #'org-switchb)
+
+;; TODO: Figure out how to get counsel-outline like behavior from consult
