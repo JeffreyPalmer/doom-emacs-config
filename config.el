@@ -49,7 +49,10 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type nil)
+
+;; Automatically load the saved desktop configuration
+;; (add-hook 'window-setup-hook #'doom/quickload-session)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -235,13 +238,15 @@
 (use-package! glsl-mode
   :mode "(\\.\\(glsl\\|vert\\|frag\\|geom\\)\\'")
 
-
-
 (map! "C-x b" #'consult-buffer)
 (map! "M-g g" #'avy-goto-line)
 (map! "M-g M-g" #'avy-goto-line)
 (map! "s-;" #'avy-goto-char-2)
 (map! "M-o" #'ace-window)
 (map! "C-c n b" #'org-switchb)
+
+(use-package! highlight-indent-guides
+  :config (setq highlight-indent-guides-method 'bitmap))
+
 
 ;; TODO: Figure out how to get counsel-outline like behavior from consult
