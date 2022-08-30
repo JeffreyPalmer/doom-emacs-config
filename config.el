@@ -36,7 +36,7 @@
   (set-face-attribute 'variable-pitch nil :height 150))
 
 (add-hook! 'org-mode-hook #'mixed-pitch-mode)
-(add-hook! 'org-mode-hook #'solaire-mode)
+;; (add-hook! 'org-mode-hook #'solaire-mode)
 (setq mixed-pitch-variable-pitch-cursor nil)
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -245,8 +245,7 @@
 (map! "M-o" #'ace-window)
 (map! "C-c n b" #'org-switchb)
 
-(use-package! highlight-indent-guides
-  :config (setq highlight-indent-guides-method 'bitmap))
-
+(after! highlight-indent-guides
+  (setq highlight-indent-guides-method 'bitmap))
 
 ;; TODO: Figure out how to get counsel-outline like behavior from consult
