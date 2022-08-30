@@ -238,6 +238,12 @@
 (use-package! glsl-mode
   :mode "(\\.\\(glsl\\|vert\\|frag\\|geom\\)\\'")
 
+;; Use Colemak-friendly keys for Avy
+(after! avy
+  ;; should be in this order: t n s e r i a o
+  (setq avy-keys '(?t ?n ?s ?e ?r ?i ?a ?o ?g ?m)))
+
+;; Some preferred keybinds
 (map! "C-x b" #'consult-buffer)
 (map! "M-g g" #'avy-goto-line)
 (map! "M-g M-g" #'avy-goto-line)
@@ -245,7 +251,20 @@
 (map! "M-o" #'ace-window)
 (map! "C-c n b" #'org-switchb)
 
+;; Use bitmap indentation highlights
 (after! highlight-indent-guides
   (setq highlight-indent-guides-method 'bitmap))
 
-;; TODO: Figure out how to get counsel-outline like behavior from consult
+;; Disable completion in org-mode buffers - it's annoying as hell
+(use-package! org
+  :hook
+  (org-mode . (lambda () (company-mode -1))))
+
+
+;; Specify that buffer locations should be reused whenever possible
+(setq display-buffer-base-action
+      '(display-buffer-reuse-mode-window
+        display-buffer-reuse-window
+        display-buffer-same-window))
+;; If a popup does happen, don't resize windows to be equally sized
+(setq even-window-sizes nil)
