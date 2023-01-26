@@ -39,6 +39,9 @@
 ;; (add-hook! 'org-mode-hook #'solaire-mode)
 (setq mixed-pitch-variable-pitch-cursor nil)
 
+;; increase the amount of overlap when scrolling by screenfuls
+(setq next-screen-context-lines 6)
+
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
@@ -62,7 +65,7 @@
   (setq org-clock-persist 'history)
   (org-clock-persistence-insinuate))
 
-(after! (org org-agenda)
+(after! org
   (setq org-agenda-files (list org-directory)
         org-agenda-start-day nil
         org-default-notes-file (concat org-directory "/inbox.org")
@@ -128,6 +131,7 @@
                                        ("" ("project" . nil) ("active" . nil))
                                        ("ACTIVE" ("active" . t))
                                        ("FINISHED" ("active" . nil))
+                                       ("CANCELLED" ("active" . nil))
                                        ("SOMEDAY" ("active" . nil))
                                        ("MAYBE" ("active" . nil)))
         ;; agenda customization
@@ -260,6 +264,12 @@
   :hook
   (org-mode . (lambda () (company-mode -1))))
 
+;; Disable popup-based completion in all text modes - also annoying as hell
+(use-package! company
+  :config
+  (setq +company-backend-alist (assq-delete-all 'text-mode +company-backend-alist))
+  (add-to-list '+company-backend-alist '(text-mode (:separate company-yasnippet))))
+
 
 ;; Specify that buffer locations should be reused whenever possible
 (setq display-buffer-base-action
@@ -268,3 +278,12 @@
         display-buffer-same-window))
 ;; If a popup does happen, don't resize windows to be equally sized
 (setq even-window-sizes nil)
+
+;; workaround typescript indentation bug
+;; force typescript indentation level to 2 spaces so that I don't go insane
+(after! typescript-mode
+  (setq typescript-indent-level 4))
+
+;; Disable rainbow delimiters - I can't take it
+(after! typescript-mode
+  (remove-hook 'typescript-mode-hook #'rainbow-delimiters-mode))
