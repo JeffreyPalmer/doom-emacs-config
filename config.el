@@ -267,7 +267,8 @@
 ;; Disable popup-based completion in all text modes - also annoying as hell
 (use-package! company
   :config
-  (setq +company-backend-alist (assq-delete-all 'text-mode +company-backend-alist))
+  (setq +company-backend-alist (assq-delete-all 'text-mode +company-backend-alist)
+        company-idle-delay 0.5)
   (add-to-list '+company-backend-alist '(text-mode (:separate company-yasnippet))))
 
 
@@ -287,3 +288,22 @@
 ;; Disable rainbow delimiters - I can't take it
 (after! typescript-mode
   (remove-hook 'typescript-mode-hook #'rainbow-delimiters-mode))
+
+;; Doom currently has a bug where org mode buffers are not auto-reverted, causing the agenda to be out of sync
+;; This will disable the default Doom auto-revert behavior and go back to normal
+(remove-hook 'focus-in-hook #'doom-auto-revert-buffers-h)
+(remove-hook 'after-save-hook #'doom-auto-revert-buffers-h)
+(remove-hook 'doom-switch-buffer-hook #'doom-auto-revert-buffer-h)
+(remove-hook 'doom-switch-window-hook #'doom-auto-revert-buffer-h)
+
+;; Revert dired and other buffers
+(setq global-auto-revert-non-file-buffers t)
+
+;; Revert buffers when the underlying file has changed
+(global-auto-revert-mode 1)
+
+;; Always create new workspaces for new projects
+(setq +workspaces-on-switch-project-behavior 't)
+
+;; Allow intelligent navigation through sub-words
+(global-subword-mode 1)
