@@ -65,6 +65,8 @@
   (setq org-clock-persist 'history)
   (org-clock-persistence-insinuate))
 
+(add-to-list 'org-modules 'org-checklist)
+
 (after! org
   (setq org-agenda-files (list org-directory)
         org-agenda-start-day nil
@@ -307,3 +309,27 @@
 
 ;; Allow intelligent navigation through sub-words
 (global-subword-mode 1)
+
+;; Python mode support
+(use-package! python
+  :config
+  (setq! python-shell-completion-native-enable nil
+         python-shell-interpreter "ipython"
+         python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True"))
+
+
+;; Ai Assistant mode
+(use-package! gptel
+  :config
+  (setq! gptel-api-key "KEY"
+         gptel-host "localhost:5000"
+         gptel-default-mode 'org-mode))
+
+;; (use-package! org-ai
+;;   :init
+;;   (add-hook 'org-mode-hook #'org-ai-mode)
+;;   (org-ai-global-mode)
+;;   :config
+;;   (setq org-ai-openai-chat-endpoint "http://localhost:5000/v1/chat/completions"
+;;         org-ai-openai-completion-endpoint "http://localhost:5000/v1/completions"))
+

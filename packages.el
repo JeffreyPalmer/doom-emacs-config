@@ -56,3 +56,7 @@
 (package! flycheck-glsl
   :recipe (:host github :repo "yrns/flycheck-glsl"
            :fork (:host github :repo "JeffreyPalmer/flycheck-glsl")))
+
+;; AI Chat tests
+(package! gptel)
+;; (package! org-ai)
